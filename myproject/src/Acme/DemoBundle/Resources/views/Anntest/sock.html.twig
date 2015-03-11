@@ -1,0 +1,51 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}AcmeDemoBundle:Anntest:sock{% endblock %}
+{% block stylesheets %}
+
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <p>Page content</p>
+                <p>{{ sock_content }}</p>
+            </div>
+
+        </div>
+    </div>
+
+    {{ ws_client() }}
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript">
+        var myWebSocket = WS.connect("ws://localhost:8080");
+
+         myWebSocket.on("socket/connect", function(session){
+         //session is an Autobahn JS WAMP session.
+
+            console.log("Successfully Connected!");
+
+             //the callback function in "subscribe" is called everytime an event is published in that channel.
+             session.subscribe("acme/channel", function(uri, payload){
+                 console.log("Received message", payload.msg);
+             });
+
+             session.publish("acme/channel", {msg: "This is a message!"});
+
+             session.unsubscribe("acme/channel");
+
+             session.publish("acme/channel", {msg: "I won't see this"});
+
+         });
+
+         myWebSocket.on("socket/disconnect", function(error){
+         //error provides us with some insight into the disconnection: error.reason and error.code
+
+            console.log("Disconnected for " + error.reason + " with code " + error.code);
+
+         });
+    </script>
+
+{% endblock %}

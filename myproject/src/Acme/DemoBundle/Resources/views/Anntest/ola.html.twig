@@ -1,0 +1,47 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}AcmeDemoBundle:Anntest:ola{% endblock %}
+{% block stylesheets %}
+     <link href="{{ asset('bundles/acmedemo/css/ola.css') }}" rel="stylesheet" />
+<!--{% stylesheets 'bundles/acmedemo/css/*' filter='cssrewrite' %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}-->
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1>Complimenti sei arrivato sulla Anntest:ola page</h1>
+                <table id="myTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>TITLE</th>
+                        <th>DESCRIPTION</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in res %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.title }}</td>
+                            <td>{{ item.description }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+        </div>
+        <div id="clearmy"></div>
+        <div id="div_jildy"></div>
+    </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript">
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,11 @@
+#div_jildy{
+    width: 570px;
+    height: 536px;
+    background-image: url('../../bundles/acmedemo/images/tennis_symfony.jpg');
+}
+#clearmy{
+    /*display: block;*/
+    clear: both;
+    height: 20px;
+    background-color: blue;
+}
