@@ -1,16 +1,33 @@
 {% extends "::base.html.twig" %}
 
-{% block title %}AcmeDemoBundle:Anntest:sock{% endblock %}
+{% block title %}WebSockets Demo{% endblock %}
 {% block stylesheets %}
+
+    {% stylesheets
+    'bundles/acmedemo/css/mychat_style.css'
+    filter='cssrewrite' %}
+    <link type="text/css" rel="stylesheet" href="{{ asset_url }}"/>
+    {% endstylesheets %}
 
 {% endblock %}
 
 {% block body %}
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-12">
-                <p>Page content</p>
-                <p>{{ sock_content }}</p>
+            <div class="col-lg-12" style="background-color: #333;">
+                <div id="page-wrapper">
+                    <h2>WebSockets Demo</h2>
+
+                    <div id="status"><p>Connecting...</p></div>
+
+                    <ul id="messages"></ul>
+
+                    <form id="message-form" action="#" method="post">
+                        <textarea id="message" placeholder="Write your message here..." required></textarea>
+                        <button type="submit">Send Message</button>
+                        <button type="button" id="close">Unsubscribe</button>
+                    </form>
+                </div>
             </div>
 
         </div>
@@ -20,6 +37,13 @@
 {% endblock %}
 {% block javascripts %}
     <script type="text/javascript">
+        // Get references to elements on the page.
+        var form = document.getElementById('message-form');
+        var messageField = document.getElementById('message');
+        var messagesList = document.getElementById('messages');
+        var socketStatus = document.getElementById('status');
+        var closeBtn = document.getElementById('close');
+
         var myWebSocket = WS.connect("ws://localhost:8080");
 
          myWebSocket.on("socket/connect", function(session){
@@ -27,16 +51,47 @@
 
             console.log("Successfully Connected!");
 
+             socketStatus.innerHTML = '<p>Connected to websocket server</p>';
+             socketStatus.className = 'open';
+
              //the callback function in "subscribe" is called everytime an event is published in that channel.
              session.subscribe("acme/channel", function(uri, payload){
                  console.log("Received message", payload.msg);
+
+                 messagesList.innerHTML += '<li class="received"><span>Received:</span>'+ payload.msg + '</li>';
+
              });
 
-             session.publish("acme/channel", {msg: "This is a message!"});
+             //session.publish("acme/channel", {msg: "This is a message!"});
 
-             session.unsubscribe("acme/channel");
+             // Send a message when the form is submitted.
+             form.onsubmit = function(e) {
+                 e.preventDefault();
 
-             session.publish("acme/channel", {msg: "I won't see this"});
+                 // Retrieve the message from the textarea.
+                 var message = messageField.value;
+
+                 // Send the message through the WebSocket.
+                 //socket.send(message);
+                 session.publish("acme/channel", message);
+
+                 // Clear out the message field.
+                 messageField.value = '';
+
+                 return false;
+             };
+
+
+             // Close the WebSocket connection when the close button is clicked.
+             closeBtn.onclick = function(e) {
+                 e.preventDefault();
+
+                 // Close the WebSocket.
+                 session.unsubscribe("acme/channel");
+
+                 return false;
+             };
+
 
          });
 
@@ -46,6 +101,9 @@
             console.log("Disconnected for " + error.reason + " with code " + error.code);
 
          });
+
+
+
     </script>
 
 {% endblock %}

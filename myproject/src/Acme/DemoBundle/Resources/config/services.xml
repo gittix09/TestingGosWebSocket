@@ -16,6 +16,8 @@
         </service>
 
         <service id="acme_demo.topic_sample_service" class="Acme\DemoBundle\Topic\AcmeTopic">
+            <tag name="gos_web_socket.topic" />
+            <argument type="service" id="gos_web_socket.client_storage" />
         </service>
 
     </services>

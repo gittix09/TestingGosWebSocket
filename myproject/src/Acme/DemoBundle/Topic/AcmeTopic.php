@@ -8,12 +8,26 @@
 
 namespace Acme\DemoBundle\Topic;
 
+//use Symfony\Component\Security\Core\User\UserInterface;
+use Gos\Bundle\WebSocketBundle\Client\ClientStorage;
 use Gos\Bundle\WebSocketBundle\Topic\TopicInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Wamp\Topic;
 
 class AcmeTopic implements TopicInterface
 {
+    /**
+     * @var ClientStorage
+     */
+    protected $clientStorage;
+
+    /**
+     * @param ClientStorage $clientStorage
+     */
+    public function __construct(ClientStorage $clientStorage)
+    {
+        $this->clientStorage = $clientStorage;
+    }
 
     /**
      * This will receive any Subscription requests for this topic.
@@ -24,8 +38,10 @@ class AcmeTopic implements TopicInterface
      */
     public function onSubscribe(ConnectionInterface $connection, Topic $topic)
     {
+        /** @var UserInterface */
+        $user = $this->clientStorage->getClient(ClientStorage::getStorageId($connection));
         //this will broadcast the message to ALL subscribers of this topic.
-        $topic->broadcast($connection->resourceId . " has joined " . $topic->getId());
+        $topic->broadcast(['msg' => $user . " has joined " . $topic->getId()]);
     }
 
     /**
@@ -38,7 +54,7 @@ class AcmeTopic implements TopicInterface
     public function onUnSubscribe(ConnectionInterface $connection, Topic $topic)
     {
         //this will broadcast the message to ALL subscribers of this topic.
-        $topic->broadcast($connection->resourceId . " has left " . $topic->getId());
+        $topic->broadcast(['msg' => $connection->resourceId . " has left " . $topic->getId()]);
     }
 
 
@@ -55,20 +71,15 @@ class AcmeTopic implements TopicInterface
     public function onPublish(ConnectionInterface $connection, Topic $topic, $event, array $exclude, array $eligible)
     {
         /*
-        $topic->getId() will contain the FULL requested uri, so you can proceed based on that
+            $topic->getId() will contain the FULL requested uri, so you can proceed based on that
 
-        e.g.
-
-        if ($topic->getId() == "acme/channel/shout")
-            //shout something to all subs.
+            if ($topic->getId() == "acme/channel/shout")
+               //shout something to all subs.
         */
 
-
-        $topic->broadcast(array(
-            "sender" => $connection->resourceId,
-            "topic" => $topic->getId(),
-            "event" => $event
-        ));
+        $topic->broadcast([
+            'msg' => $event
+        ]);
     }
 
     /**
